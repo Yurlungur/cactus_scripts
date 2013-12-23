@@ -2,7 +2,7 @@
 
 # extract_tensor_data.py
 # Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-# Time-stamp: <2013-12-22 23:06:41 (jonah)>
+# Time-stamp: <2013-12-23 15:12:09 (jonah)>
 
 # This is a library extracts the data from the flattened array of a
 # tensor that's used in Cactus ASCII gnuplot output.
@@ -137,5 +137,39 @@ def element_at_position_of_time(i,j,position,data):
     elements = np.array(elements)
     return times,elements
 
+def element_at_position_of_time_from_file(i,j,position,filename):
+    """
+    Same as element at position of time, but extracts information from
+    a file.
+    """
+    data = extract_data(filename)
+    return element_at_position_of_time(i,j,position,data)
+
+def element_of_position_at_time(i,j,coord,time,data):
+    """
+    Returns two lists, position in the spacetime, and the (i,j)th
+    element of the tensor in dataset data at that position. Both are
+    evaluated at the time given by time. This is number of computer
+    iterations, not coordinate time.
+
+    coord gives the coordinate to examine. 0=x,1=y=2=z
+    """
+    positions = []
+    elements = []
+    for line in data[time]:
+        positions.append(line[5][coord])
+        elements.append(tensor_element(i,j,line[-1]))
+    positions = np.array(positions)
+    elements = np.array(elements)
+    return positions,elements
+
+def element_of_position_at_time_from_file(i,j,coord,time,filename):
+    """
+    Same as element_of_position_at_time but extracts information from
+    a file.
+    """
+    data = extract_data(filename)
+    return element_of_position_at_time(i,j,coord,time,data)
+
 if __name__=="__main__":
-    print WARNING_MESSAGE
+    raise ImportWarning(WARNING_MESSAGE)
