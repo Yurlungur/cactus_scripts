@@ -3,7 +3,7 @@
 """
 plot_gaugewave.py
 Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-Time-stamp: <2013-12-23 15:59:14 (jonah)>
+Time-stamp: <2013-12-23 16:51:52 (jonah)>
 
 This program plots the gauge wave at time index i of every input file
 and compares it to the expected gaugewave.
@@ -13,11 +13,12 @@ python2 plot_gaugewave.py 0 *curv.x.asc
 
 # Imports
 # ----------------------------------------------------------------------
-import extract_tensor_data as etd
-import numpy as np
-import scipy as sp
+import extract_tensor_data as etd # To deal with tensor ascii files
+import numpy as np # For array support
+# Plot tools
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+import sys # For globbing support
 # ----------------------------------------------------------------------
 
 
@@ -78,6 +79,7 @@ def get_theoretical_kxx(xmin,xmax,time):
     y = gaugewave(x,time)
     return x,y
 
+
 def plot_kxx(positions_list,kxx_list,filename_list,time):
     """
     Plots the theoretical value for kxx at the time (not time index)
@@ -107,3 +109,15 @@ def plot_kxx(positions_list,kxx_list,filename_list,time):
     return
 
 
+def main(time_index,file_list):
+    """
+    Plots kxx for every file in file list at the given time index.
+    """
+    positions_list,kxx_list,time_list = get_kxx_data(time_index,file_list)
+    plot_kxx(positions_list,kxx_list,file_list,time_list)
+    return
+
+if __name__ == "__main__":
+    time_index = sys.argv[1]
+    file_list = sys.argv[2:]
+    main(time_index,file_list)
