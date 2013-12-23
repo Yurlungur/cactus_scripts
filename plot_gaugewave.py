@@ -3,7 +3,7 @@
 """
 plot_gaugewave.py
 Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-Time-stamp: <2013-12-23 15:45:16 (jonah)>
+Time-stamp: <2013-12-23 15:59:14 (jonah)>
 
 This program plots the gauge wave at time index i of every input file
 and compares it to the expected gaugewave.
@@ -28,6 +28,10 @@ A = 0.1 # The amplitude of the wave.
 COORD = 0 # The x coordinate
 E_INDEX=(0,0) # The xx component of the extrinsic curvature tensor
 KXX_RESOLUTION = 200 # Resolution for plot_kxx
+my_linewidth = 5
+fontsize = 20
+xlabel = "Position"
+ylabel = r'$K_{xx}$'
 # ----------------------------------------------------------------------
 
 
@@ -80,4 +84,26 @@ def plot_kxx(positions_list,kxx_list,filename_list,time):
     and compares it to the same plots stored in positions_list and
     kxx_list. Uses the filename_list for a legend.
     """
+    # Find plot domain
+    xmin = min([min(position) for position in positions_list])
+    xmax = max([max(position) for position in positions_list])
     
+    # Get theoretical data
+    theoretical_positions,theoretical_kxx = get_theoretical_kxx(xmin,xmax,time)
+    
+    # Change font size
+    mpl.rcParams.update({'font.size': fontsize})
+    # Define plots
+    lines = [plt.plot(theoretical_positions,theoretical_kxx,
+                      linewidth=my_linewidth)]
+    lines += [plt.plot(positions_list[i],kxx_list[i],linewidth=my_linewidth) \
+                  for i in range(len(positions_list))]
+    # Plot parameters
+    plt.xlim([xmin,xmax])
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.legend(["theoretical value"] + filename_list)
+    plt.show()
+    return
+
+
