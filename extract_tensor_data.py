@@ -2,7 +2,7 @@
 
 # extract_tensor_data.py
 # Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-# Time-stamp: <2013-12-23 15:12:09 (jonah)>
+# Time-stamp: <2013-12-23 23:54:51 (jonah)>
 
 # This is a library extracts the data from the flattened array of a
 # tensor that's used in Cactus ASCII gnuplot output.
@@ -39,6 +39,7 @@ symmetric, this is all the information.
 # Imports
 # ----------------------------------------------------------------------
 import numpy as np # For arrays
+from numpy.linalg import norm
 # ----------------------------------------------------------------------
 
 
@@ -81,7 +82,8 @@ def make_iteration_subarray(iter_string):
     """
     # First mak the iter string into a list of space-separated lists.
     # We also remove the comment lines.
-    list_strings = filter(lambda x: x[0] != '#',iter_string.split('\n'))
+    list_strings = filter(lambda x: bool(x) and x[0] != '#',
+                          iter_string.split('\n'))
     # We now split by tabs and turn grouped elements into 1d arrays
     # and lone elements into floating-point numbers.
     data = [[to_array_or_float(column.rstrip()) \
@@ -99,6 +101,18 @@ def extract_data(filename):
     iterations = [make_iteration_subarray(iteration) \
                       for iteration in get_iterations(data_string)]
     return iterations
+
+def get_lattice_spacing(data):
+    """
+    Extracts the grid spacing by measuring the 2-norm of the
+    difference between two points in a given snapshot at a given
+    time. The snapshot and time are assumed not to matter. This is
+    obviously a poor assumption for adaptive mesh refinement and will
+    need to be rethunk in more serious cases.
+    """
+    position1 = data[0][0][5]
+    position2 = data[0][1][5]
+    return norm(position2 - position1)
 
 def tensor_element(i,j,tensor):
     """
