@@ -2,7 +2,7 @@
 
 # extract_tensor_data.py
 # Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-# Time-stamp: <2013-12-23 23:54:51 (jonah)>
+# Time-stamp: <2013-12-27 02:50:41 (jonah)>
 
 # This is a library extracts the data from the flattened array of a
 # tensor that's used in Cactus ASCII gnuplot output.
@@ -22,11 +22,24 @@ is based on machine time iteration. Then the format is
 where each snapshot takes place at a different iteration.
 The format of the snapshots is
 
+[row1,row2,row3,row4,...],
+
+where each row is a list of the form
+
 [time_step, tl, [rl,c,ml], [ix,iy,iz], t, [x,y,z], data],
 
-where I have no idea what tl, rl, c, and ml mean. I think that ix,iy,
-and iz are the indexes of the lattice points on the grid. Data is for
-a 3x3 symmetric tensor
+tl = time level. You can output past time levels if you store them,
+i.e., if you use a multistep integrator. Or if you use adaptive mesh
+refinement. Current time is zero. Past times are >= 1
+
+rl = Refinement level. Adaptive mesh refinement. Course grid is level 0.
+
+c = component. The index of the processor the domain is on.
+
+ml = multigrid level. Unused. Always zero.
+
+ix,iy, and iz are the indexes of the lattice points on the grid. Data
+is for a 3x3 symmetric tensor
 
 [Txx, Txy, Txz, Tyy, Tyz, Tzz]
 
