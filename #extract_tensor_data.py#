@@ -43,7 +43,7 @@ is for a 3x3 symmetric tensor
 
 [Txx, Txy, Txz, Tyy, Tyz, Tzz]
 
-where T is whatever tensor we're interested in. Since the tensor is
+where T is whatever tensor we're interested in. Since the tensor isc
 symmetric, this is all the information.
 """
 # ----------------------------------------------------------------------
