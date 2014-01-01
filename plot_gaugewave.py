@@ -3,7 +3,7 @@
 """
 plot_gaugewave.py
 Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-Time-stamp: <2013-12-31 21:03:01 (jonah)>
+Time-stamp: <2013-12-31 23:31:52 (jonah)>
 
 This program plots the gauge wave at time index i of every input file
 and compares it to the expected gaugewave.
@@ -41,6 +41,9 @@ ylabel = r'$K_{xx}$'
 err_label = r'$K_{xx}$' + " error"
 # Mark true if you want to examine error without phase or offset shift
 FIX_ERROR = True
+# Mark true for debugging statements
+DEBUGGING = True
+
 # ----------------------------------------------------------------------
 
 
@@ -149,41 +152,6 @@ def find_phase_shift(position,kxx):
     popt,pcov = curve_fit(gaugewave_kxx,position,kxx)
     phi = popt[0]
     return phi
-    
-def find_origin(position,kxx):
-    """
-    Finds the phase offset of a kxx solution.
-    """
-    return position[list(kxx).index(np.max(kxx))]
-
-def find_theoretical_origin(xmin,xmax,time):
-    """
-    Finds the position value at which kxx is maximized.
-
-    We have a maximum when x - t = 0 modulo 2 pi/d.
-
-    We want to solve for an x s.t. xmin <= x <= xmax and s.t.
-    x - t = 0 mod 2 pi/d
-
-    This corresponds to
-
-    x = (2*pi*n)/d + t, for some integer n.
-    """
-    n_min = np.floor((D/2*np.pi)*(xmin - time))
-    n_max = np.floor((D/2*np.pi)*(xmax - time))
-    origins = [2*np.pi*n/D + time for n in range(n_min+1,n_max+1)]
-    if origins: # Arbitarily return the center "origin"
-        return origins[len(origins)/2]
-    else:
-        return False
-
-def remove_phase_shift(position,kxx,time):
-    """
-    Given a plot kxx(position) at time, finds where the theoretical
-    maximum value is and phase shifts the position to remove phase
-    error.
-    """
-    
 
 def plot_h4_errors(positions_list,kxx_list,h_list, filename_list,time):
     """
@@ -196,18 +164,32 @@ def plot_h4_errors(positions_list,kxx_list,h_list, filename_list,time):
     if FIX_ERROR:
         crude_average = lambda x: 0.5*(np.max(x) + np.min(x))
         kxx_list = [kxx - crude_average(kxx) for kxx in kxx_list]
-        theoretical_positions_list = [positions_list[i] - find_origin(positions_list[i], kxx_list[i]) for i in range(len(positions_list))]
-        
-#        errors = [get_error(theoretical_positions_list[i],kxx_list[i],time)\
-#                      for i in range(len(kxx_list))]
-#    else:
-#        errors = [get_error(positions_list[i],kxx_list[i],time)\
-#                      for i in range(len(kxx_list))]
-    errors = [get_error(positions_list[i],kxx_list[i],time)\
-                  for i in range(len(kxx_list))]
-        
+        phi_list = [find_phase_shift(positions_list[i],kxx_list[i])\
+                        for i in range(len(kxx_list))]
+        errors = [get_error(positions_list[i],kxx_list[i],phi_list[i])\
+                      for i in range(len(kxx_list))]
+        if DEBUGGING:
+            for i in range(len(kxx_list)):
+                x,y = get_theoretical_kxx(np.min(positions_list[i]),
+                                          np.max(positions_list[i]),
+                                          phi_list[i])
+                plt.plot(positions_list[i],kxx_list[i],x,y)
+                plt.show()
+    else:
+        errors = [get_error(positions_list[i],kxx_list[i],time)\
+                      for i in range(len(kxx_list))]
+
+    if DEBUGGING:
+        for i in range(len(filename_list)):
+            print "{} has max error {}.".format(filename_list[i],
+                                                np.max(errors[i]))
+
     # Define errors to the fourth power
     h4_errors = [(h_list[i]**(-4.0))*errors[i] for i in range(len(kxx_list))]
+    if DEBUGGING:
+        for i in range(len(filename_list)):
+            print "{} has {} grid points.".format(filename_list[i],
+                                                  len(errors[i]))
 
     # Change font size
     mpl.rcParams.update({'font.size': fontsize})
@@ -221,7 +203,6 @@ def plot_h4_errors(positions_list,kxx_list,h_list, filename_list,time):
     plt.legend(filename_list)
     plt.show()
     return
-    
 
 def main(time,file_list):
     """
