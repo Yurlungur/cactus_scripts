@@ -1,17 +1,12 @@
-#!/usr/bin/env python2
-
-# extract_tensor_data.py
-# Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-# Time-stamp: <2013-12-27 14:20:09 (jonah)>
-
-# This is a library extracts the data from the flattened array of a
-# tensor that's used in Cactus ASCII gnuplot output.
-# ----------------------------------------------------------------------
-
-
-# Approach
-# ----------------------------------------------------------------------
 """
+extract_tensor_data.py
+Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
+Time-stamp: <2014-01-01 22:12:41 (jonah)>
+
+This is a library extracts the data from the flattened array of a
+tensor that's used in Cactus ASCII gnuplot output.
+----------------------------------------------------------------------
+
 The goal is to extract information in a way that makes it easy to
 plot. For example, to plot the x-component as a function of time at a
 given position. This means we want a multidimensional array. The array
@@ -61,6 +56,13 @@ from numpy.linalg import norm
 WARNING_MESSAGE = "This is a library. You are only supposed to import it!"
 # ----------------------------------------------------------------------
 
+def find_largest_index_of_subvalue(collection, value):
+    """
+    Finds the index of the largest element in the collection less than
+    value.
+    """
+    subcollection = filter(lambda x: x <= value, collection)
+    return collection.index(max(subcollection))
 
 def to_array_or_float(input_string,separator=' '):
     """
