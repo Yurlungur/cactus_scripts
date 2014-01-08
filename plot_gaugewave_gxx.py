@@ -3,7 +3,7 @@
 """
 plot_gaugewave_gxx.py
 Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-Time-stamp: <2014-01-02 00:03:06 (jonah)>
+Time-stamp: <2014-01-02 20:04:19 (jonah)>
 
 This program plots the xx component of the metric for a gauge wave at
 time t of every input file and compares it to the expected gaugewave.
@@ -30,7 +30,12 @@ ylabel = r'$g_{xx}$'
 # Error plot y axis label
 err_label = ylabel + " error"
 if pg.SCALE_ERRORS:
-    err_label += ERR_LABEL_MODIFIER
+    err_label += pg.ERR_LABEL_MODIFIER
+# Mark true if you want to scale errors
+SCALE_ERRORS = True # pg.SCALE_ERRORS # default
+# Mark true if you want to examine error without phase or offset shift
+FIX_PHASE = True
+FIX_OFFSET = False
 # ----------------------------------------------------------------------
 
 def gaugewave_gxx(x,t):
@@ -38,9 +43,9 @@ def gaugewave_gxx(x,t):
     The analytic form of the gxx component of a gaugewave as a
     function of x and t. It is independent of y and z.
     """
-    return 1 - A*np.sin(2*np.pi*(x-t)/D)
+    return 1 - pg.A*np.sin(2*np.pi*(x-t)/pg.D)
 
-def main(time,file_list):
+def main(time,filename_list):
     """
     Plots gxx for every file in the file list at the given time. 
     """
@@ -49,7 +54,7 @@ def main(time,file_list):
     pg.plot_Txx(positions_list,gxx_list,filename_list,time,ylabel,
                 gaugewave_gxx)
     pg.plot_errors(gaugewave_gxx,positions_list,gxx_list,h_list,filename_list,
-                   time,ylabel,err_label,pg.SCALE_ERRORS)
+                   time,ylabel,err_label,SCALE_ERRORS,FIX_OFFSET,FIX_PHASE)
     return
 
 if __name__ == "__main__":

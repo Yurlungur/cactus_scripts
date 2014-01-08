@@ -3,7 +3,7 @@
 """
 plot_gaugewave_kxx.py
 Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-Time-stamp: <2014-01-02 00:01:21 (jonah)>
+Time-stamp: <2014-01-02 20:04:13 (jonah)>
 
 This program plots the extrinsic curvature gauge wave at time index t
 of every input file and compares it to the expected gaugewave.
@@ -30,7 +30,10 @@ ylabel = r'$K_{xx}$'
 # Error plot y axis label
 err_label = ylabel + " error"
 if pg.SCALE_ERRORS:
-    err_label += ERR_LABEL_MODIFIER
+    err_label += pg.ERR_LABEL_MODIFIER
+# Mark true if you want to examine error without phase or offset shift
+FIX_PHASE = True
+FIX_OFFSET = True
 # ----------------------------------------------------------------------
 
 def gaugewave_kxx(x,t):
@@ -78,8 +81,9 @@ def plot_h4_errors(positions_list,kxx_list,h_list, filename_list,time):
 
     h is the lattice spacing.
     """
-    pg.plot_errors(gaugewave_kxx,positions_list,kxx_list,h_list,filename_list,
-                   time, ylabel,err_label,pg.SCALE_ERRORS)
+    pg.plot_errors(gaugewave_kxx,positions_list,kxx_list,h_list,
+                   filename_list, time, ylabel,err_label,
+                   pg.SCALE_ERRORS,FIX_PHASE,FIX_OFFSET)
 
     
 def main(time,file_list):

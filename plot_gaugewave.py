@@ -1,7 +1,7 @@
 """
 plot_gaugewave.py
 Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-Time-stamp: <2014-01-01 23:52:37 (jonah)>
+Time-stamp: <2014-01-02 20:05:01 (jonah)>
 
 This is a library containing a few simple tools for plotting a
 gaugewave. It contains constants like the amplitude.
@@ -40,8 +40,6 @@ ERR_LABEL_MODIFIER = r'$/h^4$'
 EXPONENT = -4.0 if SCALE_ERRORS else 0.0
 # Exponent to scale errors by
 EXPONENT = -4.0 if SCALE_ERRORS else 0.0
-# Mark true if you want to examine error without phase or offset shift
-FIX_ERROR = True
 # Mark true for debugging statements
 DEBUGGING = True
 # ----------------------------------------------------------------------
@@ -69,7 +67,8 @@ def get_Txx_data(time,filename_list):
     for filename in filename_list:
         data = etd.extract_data(filename)
         times = [snapshot[0][4] for snapshot in data]
-        time_index = etd.find_largest_index_of_subvalue(times,time)
+        # time_index = etd.find_largest_index_of_subvalue(times,time)
+        time_index = times.index(time) # Raises error if times are not exact
         position,Txx=etd.element_of_position_at_time(E_INDEX[0], E_INDEX[1],
                                                      COORD, time_index, data)
         time_index_list.append(time_index)
@@ -144,7 +143,9 @@ def find_Txx_phase_shift(function,position,Txx):
 
 def plot_errors(function,positions_list,Txx_list,
                 h_list,filename_list,time,ylabel,err_label,
-                divide_by_h_to_the_4):
+                divide_by_h_to_the_4,
+                fix_offset,
+                fix_phase):
     """
     Plots the error for every datafile in the filename list. May scale
     by dividing by h^4 if this is set. Requires the positions_list and
@@ -153,38 +154,37 @@ def plot_errors(function,positions_list,Txx_list,
     h is the lattice spacing.
     """
     # Center the kxx lists around their average
-    if FIX_ERROR:
+    if fix_offset:
         crude_average = lambda x: 0.5*(np.max(x) + np.min(x))
         Txx_list = [Txx - crude_average(Txx) for Txx in Txx_list]
-        phi_list = [find_Txx_phase_shift(function,positions_list[i],
-                                         Txx_list[i])\
+        if DEBUGGING:
+            print "Fixing offset."
+    if fix_phase:
+        phi_list = [find_Txx_phase_shift(function,positions_list[i],Txx_list[i])\
                         for i in range(len(Txx_list))]
         errors = [get_error(function,positions_list[i],
-                            Txx_list[i],phi_list[i])\
-                      for i in range(len(Txx_list))]
+                            Txx_list[i],phi_list[i]) for i in range(len(Txx_list))]
         if DEBUGGING:
-            for i in range(len(Txx_list)):
-                x,y = get_xy_pair(function,np.min(positions_list[i]),
-                                  np.max(positions_list[i]),
-                                  phi_list[i])
-                plt.plot(positions_list[i],Txx_list[i],x,y)
-                plt.show()
+            print "Fixing phase."
+                            
     else:
         errors = [get_error(function,positions_list[i],Txx_list[i],time)\
                       for i in range(len(Txx_list))]
-
+        phi_list = [time for i in range(len(Txx_list))]
     if DEBUGGING:
-        for i in range(len(filename_list)):
+        for i in range(len(Txx_list)):
+            x,y = get_xy_pair(function,np.min(positions_list[i]),
+                              np.max(positions_list[i]),
+                              phi_list[i])
+            plt.plot(positions_list[i],Txx_list[i],x,y)
+            plt.show()
             print "{} has max error {}.".format(filename_list[i],
                                                 np.max(errors[i]))
+            print "\t and has {} grid points.".format(len(errors[i]))
 
     # Define errors to the fourth power
     h4_errors = [(h_list[i]**(EXPONENT))*errors[i] \
                      for i in range(len(Txx_list))]
-    if DEBUGGING:
-        for i in range(len(filename_list)):
-            print "{} has {} grid points.".format(filename_list[i],
-                                                  len(errors[i]))
 
     # Change font size
     mpl.rcParams.update({'font.size': fontsize})
