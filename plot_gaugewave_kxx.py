@@ -3,7 +3,7 @@
 """
 plot_gaugewave_kxx.py
 Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-Time-stamp: <2014-01-02 20:04:13 (jonah)>
+Time-stamp: <2014-01-13 21:48:58 (jonah)>
 
 This program plots the extrinsic curvature gauge wave at time index t
 of every input file and compares it to the expected gaugewave.
@@ -32,8 +32,8 @@ err_label = ylabel + " error"
 if pg.SCALE_ERRORS:
     err_label += pg.ERR_LABEL_MODIFIER
 # Mark true if you want to examine error without phase or offset shift
-FIX_PHASE = True
-FIX_OFFSET = True
+FIX_PHASE = False
+FIX_OFFSET = False
 # ----------------------------------------------------------------------
 
 def gaugewave_kxx(x,t):

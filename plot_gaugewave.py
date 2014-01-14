@@ -1,7 +1,7 @@
 """
 plot_gaugewave.py
 Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-Time-stamp: <2014-01-02 20:05:01 (jonah)>
+Time-stamp: <2014-01-13 22:43:17 (jonah)>
 
 This is a library containing a few simple tools for plotting a
 gaugewave. It contains constants like the amplitude.
@@ -117,7 +117,7 @@ def plot_Txx(positions_list,Txx_list,filename_list,time,ylabel,function):
     plt.xlim([xmin,xmax])
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
-    plt.title("Guagewave {} after {} crossing times".format(ylabel,time))
+    plt.title("Gaugewave {} after {} crossing times".format(ylabel,time))
     plt.legend(["theoretical value"] + filename_list)
     plt.show()
     return
@@ -178,9 +178,10 @@ def plot_errors(function,positions_list,Txx_list,
                               phi_list[i])
             plt.plot(positions_list[i],Txx_list[i],x,y)
             plt.show()
-            print "{} has max error {}.".format(filename_list[i],
+            print "{} has max error {}".format(filename_list[i],
                                                 np.max(errors[i]))
-            print "\t and has {} grid points.".format(len(errors[i]))
+            print "\t has {} grid points".format(len(errors[i]))
+            print "\t has lattice spacing {}".format(h_list[i])
 
     # Define errors to the fourth power
     h4_errors = [(h_list[i]**(EXPONENT))*errors[i] \

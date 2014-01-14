@@ -1,7 +1,7 @@
 """
 extract_scalar_data.py
 Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-Time-stamp: <2014-01-07 23:21:27 (jonah)>
+Time-stamp: <2014-01-10 18:19:02 (jonah)>
 
 This is a library that extracts scalar data from the flattened array
 of a scalar that's used in the Cactus ASCII gunuplot output mode.
@@ -101,7 +101,7 @@ def scalar_of_position_at_time(coord,time,data):
         positions.append(line[5][coord])
         scalars.append(line[-1])
     positions = np.array(positions)
-    scalars = np.array(elements)
+    scalars = np.array(scalars)
     return positions,scalars
 
 def scalar_of_position_at_time_from_file(coord,time,filename):
@@ -110,42 +110,6 @@ def scalar_of_position_at_time_from_file(coord,time,filename):
     """
     data = extract_data(filename)
     return scalar_of_position_at_time(coord,time,data)
-
-def scalar_difference(iteration1,iteration2,data1,data2):
-    """
-    Takes two simulation datasets and generates an array that is the
-    difference between the scalars in the first file and the second
-    file at the given iterations. (Iteration here indexes snapshot
-    number.)
-
-    Iteration1 is the snapshot index for data1. Iteration2 is the
-    snapshot index for data2.
-
-    USE AT YOUR OWN RISK. VERY LIKELY TO FAIL UNLESS THE SIMULATIONS
-    THE FILES ARE FOR HAVE EXACTLY THE SAME NUMBER OF GRID POINTS
-    """
-    scalar1 = np.array([row[-1] for row in data1[iteration1]])
-    scalar2 = np.array([row[-1] for row in data2[iteration2]])
-    assert len(scalar1) == len(scalar2), "Simulations have same number of grid points."
-    return scalar1 - scalar2
-
-def scalar_difference_between_files(iteration1,iteration2
-                                    filename1,filename2):
-    """
-    Takes two simulation files and generates an array that is the
-    difference between the scalars in the first file and the second
-    file at the given iteration. (Iteration here indexes snapshot
-    number.)
-
-    Iteration1 is the snapshot index for filename1. Iteration2 is the
-    snapshot index for filename2.
-
-    USE AT YOUR OWN RISK. VERY LIKELY TO FAIL UNLESS THE SIMULATIONS
-    THE FILES ARE FOR HAVE EXACTLY THE SAME NUMBER OF GRID POINTS
-    """
-    data1 = extract_data(filename1)
-    data2 = extract_data(filename2)
-    return scalar_difference(iteration1,iteration2,data1,data2)
 
 
 if __name__=="__main__":
