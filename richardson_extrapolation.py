@@ -3,7 +3,7 @@
 """
 richardson_extrapolation.py
 Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-Time-stamp: <2014-01-17 23:30:35 (jonah)>
+Time-stamp: <2014-01-18 00:48:47 (jonah)>
 
 This program takes tensor ascii output from the einstein toolkit and
 runs a Richardson extrapolation on the data to extract the convergence
@@ -32,8 +32,8 @@ points.
 import sys # FOr command line arguments
 import numpy as np # For math and array support
 import extract_tensor_data as etd
-# Wrapper for Newton and Secant method root finder
-from scipy.optimize import newton
+# Wrapper for the simplex function minimization algorithm
+from scipy.optimize import fmin
 # Plot tools
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -46,10 +46,10 @@ COORD = 0 # The coordinate along which the projection is based
 E_INDEX=(0,0) # The component of the tensor we care about.
 LINEWIDTH=5 # The plot linewidth
 FONTSIZE=20 # The plot font size
-PLOT_TITLE="Self Convergence Test at Time t = {}"
+PLOT_TITLE="Self Convergence Test at Time t = {}\norder = {}"
 XLABEL="Position"
 YLABEL="Rescaled Difference"
-LEGEND_TEMPLATE="(h = {}) - (h = {})"
+LEGEND_TEMPLATE="<h = {}> - <h = {}>"
 ACCEPTABLE_ERROR=1E-14
 XMIN=0
 XMAX=1
@@ -59,11 +59,16 @@ FILTER_FUNCTION = lambda x: x != BAD_MARKER
 # Just a convenient alias
 ANDFUNC=lambda x,y: x and y
 # Guess for the order of convergence
-N0 = 2
+N0 = 4
 # Filenames
 FILE_PREFACTOR = "richardson."
 ALPHA_FILE = FILE_PREFACTOR + "alpha.asc"
 TRUE_SOLUTION_FILE = FILE_PREFACTOR + "true.asc"
+# The interval for the bisection algorithm is [MIN_ORDER,MAX_ORDER]
+MIN_ORDER = 0.5
+MAX_ORDER = 6.5
+# Condition for when a value is zero
+EFFECTIVE_ZERO = 1E-10
 # ----------------------------------------------------------------------
 
 
@@ -190,7 +195,7 @@ def course_grain_all(positions,tensors):
     assert reduce(ANDFUNC, [len(positions[i]) < len(positions[i+1]) for i in range(len(positions)-1)]) and "The list must be ordered coursest to finest."
     # Some convenience names and ensure that the domain of the
     # course-grained solution is correct
-    coursest_position,coursest_tensor=set_domain(positions[0],tensor[0])
+    coursest_position,coursest_tensor=set_domain(positions[0],tensors[0])
     # Course grain everything
     course_positions = [coursest_position]
     course_tensors = [coursest_tensor]
@@ -205,7 +210,7 @@ def course_grain_all(positions,tensors):
     return coursest_position,course_tensors
 
 
-def get_differences(course_tensors):
+def get_differences(tensors):
     """
     Generalizes get_difference. Takes a list of positions and a list
     of tensors of arbitrary length. Returns a new list of positions and
@@ -218,7 +223,6 @@ def get_differences(course_tensors):
     It is assumed that sort_lists was called on these datasets.
     """
     # Compare to the finest-grained solution
-    finest_position = positions[-1]
     finest_tensor = tensors[-1]
     differences = []
     for tensor in tensors[:-1]:
@@ -234,13 +238,12 @@ def find_order(differences,h_list):
     using get_differences.
     """
     # Some convenience names. We use the three finest-grain solutions
-    d = differences[-2]
+    d = differences[-2:]
     h = h_list[-3:]
     # We want to solve for n when this is zero
-    equations_list = [lambda n: d[0][i] - d[1][i] * ((h[0]**n - h[2]**n)/(h[1]**n - h[2]**n)) for i in range(len(d[0]))]
-    # Use the secant method to find n
-    n_values = [newton(equation,N0) for equation in equations_list]
-    n = np.average(n_values)
+    func = lambda n: np.max(np.abs(d[1] - d[0] * ((h[0]**n - h[2]**n)/(h[1]**n - h[2]**n))**(-1)))
+    xopt = fmin(func,N0)
+    n = xopt[0]
     return n
 
 
@@ -272,7 +275,7 @@ def output_tensor(position,tensor,filename):
     """
     with open(filename,'w') as f:
         for i in range(len(position)):
-            f.write("{} {}".format(position[i],tensor[i]))
+            f.write("{} {}\n".format(position[i],tensor[i]))
     return
 
 
@@ -282,7 +285,7 @@ def get_error_scale_factors(h_list,n):
     up. Assumed the course-grained values are compared to the
     finest-grained value.
     """
-    return [(h_list[i]**n - h[-1]**n)/(h_list[i+1]**n - h_list[-1]**n) for i in range(len(h_list)-1)]
+    return [((h_list[i]**n - h_list[-1]**n)/(h_list[i+1]**n - h_list[-1]**n))**(-1) for i in range(len(h_list)-2)] + [1]
 
 
 def plot_convergence(position,differences_list,h_list,n,time):
@@ -308,7 +311,7 @@ def plot_convergence(position,differences_list,h_list,n,time):
     plt.xlim([XMIN,XMAX])
     plt.xlabel(XLABEL)
     plt.ylabel(YLABEL)
-    plt.title(PLOT_TITLE.format(time))
+    plt.title(PLOT_TITLE.format(time,n))
     plt.legend([LEGEND_TEMPLATE.format(h,h_list[-1]) for h in h_list[:-1]])
     plt.show()
     return            
@@ -321,25 +324,37 @@ def main(time,filename_list):
     time. Prints the convergence order to the terminal and saves the
     alpha and true solution datasets to separate files.
     """
+    print "Welcome to the richardson extrapolation program."
     # Extract data
+    print "Loading files..."
     positions_list,tensor_list,time_index_list,h_list=get_tensor_data(time,filename_list)
     # Sort lists
+    print "Sorting lists..."
     positions_list,tensor_list,time_index_list,h_list,filename_list = sort_lists(positions_list,tensor_list,time_index_list,h_list,filename_list)
     # Get course grid points
+    print "Generating course grid points..."
     course_positions,course_tensor_list = course_grain_all(positions_list,tensor_list)
     # Differences
+    print "Getting the differences between data sets..."
     differences_list = get_differences(course_tensor_list)
     # Find convergence order
+    print "Finding order of convergence..."
     n = find_order(differences_list,h_list)
-    print n
+    print "Order = {}".format(n)
     # Find the factor for error
+    print "Finding contribution to error due to problem..."
     alpha = find_alpha(differences_list,h_list,n)
+    print "Printing..."
     output_tensor(course_positions,alpha,ALPHA_FILE)
     # Find the true solution. Use finest grain solution for extrapolation
+    print "Finding true solution..."
     true_solution = find_true_tensor(course_tensor_list[-1],h_list[-1],alpha,n)
+    print "Printing..."
     output_tensor(course_positions,true_solution,TRUE_SOLUTION_FILE)
     # Plot
+    print "Plotting convergence test..."
     plot_convergence(course_positions,differences_list,h_list,n,time)
+    print "All done! Thanks!"
     return
 
 
