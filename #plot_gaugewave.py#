@@ -89,27 +89,6 @@ def get_xy_pair(function,xmin,xmax,time):
     return x,y
 
 
-def get_difference(positions,Txxs):
-    """
-    Assumed that positions is a list of [position1,position2] and
-    Txxs is a list of [Txx1,Txx2]
-    Returns a list of positions and tensors that is the difference
-    between Txx1 and Txx2 at the courser positions
-    """
-    course_index = 0 if len(positions[0]) < len(positions[1]) else 1
-    other_index = 0 if course_index == 1 else 1
-    pos = []
-    difference = []
-    same_position = lambda i,j: positions[course_index][i] \
-        - positions[other_index][j] < ACCEPTABLE_ERROR
-    for i in range(len(positions[course_index])):
-        for j in range(len(positions[other_index])):
-            if same_position(i,j) and positions[course_index][i] not in pos:
-                pos.append(positions[course_index][i])
-                difference.append(Txxs[course_index][i] \
-                                      - Txxs[other_index][j])
-    return pos,difference
-
 def plot_Txx(positions_list,Txx_list,filename_list,time,ylabel,function):
     """
     Plots the theoretical value for Txx, the xx-component of the
@@ -140,7 +119,6 @@ def plot_Txx(positions_list,Txx_list,filename_list,time,ylabel,function):
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.title("Gaugewave {} after {} crossing times".format(ylabel,time))
-    plt.legend(filename_list)
     plt.legend(["theoretical value"] + filename_list)
     plt.show()
     return
