@@ -1,7 +1,7 @@
 """
 extract_tensor_data.py
 Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-Time-stamp: <2014-01-07 23:08:56 (jonah)>
+Time-stamp: <2014-02-03 17:35:19 (jonah)>
 
 This is a library extracts the data from the flattened array of a
 tensor that's used in Cactus ASCII gnuplot output.
@@ -193,6 +193,23 @@ def element_at_position_of_time_from_file(i,j,position,filename):
     data = extract_data(filename)
     return element_at_position_of_time(i,j,position,data)
 
+
+def element_of_position_at_snapshot(i,j,coord,snapshot):
+    """
+    Returns two lists, position in the spacetime and the (i,j)th
+    element of the tensor in the snapshot at that position.
+
+    coord gives the coordinate to examine. 0=x,1=y=2=z
+    """
+    positions = []
+    elements = []
+    for line in snapshot:
+        positions.append(line[5][coord])
+        elements.append(tensor_element(i,j,line[-1]))
+    positions = np.array(positions)
+    elements = np.array(elements)
+    return positions,elements
+
 def element_of_position_at_time(i,j,coord,time,data):
     """
     Returns two lists, position in the spacetime, and the (i,j)th
@@ -202,14 +219,8 @@ def element_of_position_at_time(i,j,coord,time,data):
 
     coord gives the coordinate to examine. 0=x,1=y=2=z
     """
-    positions = []
-    elements = []
-    for line in data[time]:
-        positions.append(line[5][coord])
-        elements.append(tensor_element(i,j,line[-1]))
-    positions = np.array(positions)
-    elements = np.array(elements)
-    return positions,elements
+    return element_of_position_at_snapshot(i,j,coord,data[time])
+
 
 def element_of_position_at_time_from_file(i,j,coord,time,filename):
     """
@@ -218,6 +229,42 @@ def element_of_position_at_time_from_file(i,j,coord,time,filename):
     """
     data = extract_data(filename)
     return element_of_position_at_time(i,j,coord,time,data)
+
+
+def find_norm(i,j,snapshot,order):
+    """
+    Finds the order-norm of the (i,j)th component of a tensor.
+    """
+    return np.norm([tensor_element(i,j,line[-1]) for line in snapshot],
+                   ord=order)
+
+
+def find_norm_of_time(i,j,data,order=2):
+    """
+    Finds the order-norm of the (i,j)th component of a tensor as a
+    function of time.
+    """
+    norms = []
+    times = []
+    for snapshot in data:
+        norm = find_norm(i,j,snapshot,order)
+        norms.append(norm)
+        times.append(snapshot[0][-3])
+    norms = np.array(norms)
+    times = np.array(times)
+    return norms,times
+
+
+def find_norm_of_time_from_file(i,j,filename,order=2):
+    """
+    Finds the order-norm of the (i,j)th component of a tensor as a
+    function of time.
+
+    Uses a file.
+    """
+    data = extract_data(filename)
+    return find_norm_of_time(i,j,data,order)
+
 
 if __name__=="__main__":
     raise ImportWarning(WARNING_MESSAGE)
