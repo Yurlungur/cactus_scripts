@@ -1,0 +1,78 @@
+\documentclass[]{article}
+% Time-stamp: <2014-01-17 19:36:04 (jonah)>
+
+% packages
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{latexsym}
+\usepackage{graphicx}
+\usepackage{mathrsfs}
+\usepackage{verbatim}
+\usepackage{braket}
+\usepackage{listings}
+\usepackage{hyperref}
+
+% Preamble
+\hypersetup{pdftitle={background}}
+\author{Jonah Miller\\
+  \href{mailto:jonah.maxwell.miller@gmail.com}{jonah.maxwell.miller@gmail.com}}
+\title{Richardson Extrapolation}
+
+% Macros
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\eval}{\biggr\rvert} %evaluated at
+
+\begin{document}
+\maketitle
+
+Suppose that we are numerically solving a differential equation by
+finite differences. The true answer is a function
+\begin{equation}
+  \label{eq:f^*(x)}
+  f^*(x)
+\end{equation}
+which we will often denote $f^*$ for brevity. A numerical solution to
+the problem is modified by the lattice spacing $h$ and a factor
+$\alpha(x)$ which is a function of the problem itself:
+\begin{equation}
+  \label{eq:f(h)}
+  f(h) = f^* + \alpha h^n,
+\end{equation}
+where $n$ is the order convergence of the method.
+
+Now suppose that we know the numerical solution for three values of
+$h$, $h_1$, $h_2$, and $h_3$, with corresponding numerical solutions
+$f_1$, $f_2$, and $f_3$. From this information, can we extract $n$ and
+pointwise solutions for $f^*$ and $\alpha$? We begin by devising a
+numerical way to extract $n$. 
+\begin{eqnarray}
+  \frac{f_1 - f_3}{f_2-f_3} &=& \frac{(f^* + \alpha h_1^n) - (f^*+\alpha h_3^n)}{(f^* - \alpha h_2^n) - (f^* + \alpha h_3^n)}\nonumber\\
+  \label{eq:n:equation}
+  \Rightarrow \frac{f_1 - f_3}{f_2-f_3} &=& \frac{h_1^n - h_3^n}{h_2^n - h_3^n}.
+\end{eqnarray}
+Although in general it is not analytically solvable, one can use
+one-dimensional root-finding to solve equation \eqref{eq:n:equation}
+for $n$. Theoretically, one should perform this test at every lattice
+point or use curve-fitting methods like least-squares to solve for the
+value of $n$. However, it is probably sufficient to solve for $n$ at a
+single well-chosen grid point.
+
+Once $n$ is known, we can solve for $\alpha$:
+\begin{eqnarray}
+  f_1 - f_3 &=& \alpha(h_1^n - h_3^n)\nonumber\\
+  \label{eq:alpha:equation}
+  \Rightarrow \alpha &=& \frac{f_2 - f_3}{h_2^n - h_3^n}.
+\end{eqnarray}
+$\alpha$ will very likely depend on $x$.
+
+Finally, we can extract the true solution using $n$, $\alpha$ and any
+one of the numerical solutions:
+\begin{equation}
+  \label{eq:true:solution}
+  f^* = f_i - \alpha h_i^n\ \forall\ i\in\{1,2,3\}.
+\end{equation}
+It's probably best to use the most fine-grained solution one has to
+extract the true solution.
+
+\end{document}

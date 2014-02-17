@@ -3,7 +3,7 @@
 """
 plot_gaugewave_gxx.py
 Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-Time-stamp: <2014-01-02 20:04:19 (jonah)>
+Time-stamp: <2014-02-16 21:25:37 (jonah)>
 
 This program plots the xx component of the metric for a gauge wave at
 time t of every input file and compares it to the expected gaugewave.

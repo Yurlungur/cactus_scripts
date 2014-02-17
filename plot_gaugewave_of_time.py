@@ -3,7 +3,7 @@
 """
 plot_gaugewave_of_time.py
 Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-Time-stamp: <2014-02-03 17:46:29 (jonah)>
+Time-stamp: <2014-02-07 18:01:28 (jonah)>
 
 This is a simple library to plot the norm of g_{xx} as a function of
 time for a gaugewave. Several gaugewave files can be plotted at the
@@ -41,6 +41,7 @@ FONTSIZE = 20
 COORD = 0 # The x coordinate
 ORDER = 2 # Order of norm
 TENSOR_NAME = r'$g_{xx}$' # Name of the tensor we want to plot
+RK_ORDER=4
 # ----------------------------------------------------------------------
 
 
@@ -143,7 +144,10 @@ def calculate_analytic_form(function,snapshot):
 
 
 def plot_norm_error_of_time(function_list,evolutions,filename_list,
-                            tensor_name,order=2):
+                            h_list=False,
+                            tensor_name=TENSOR_NAME,
+                            order=ORDER,
+                            rk_order=RK_ORDER):
     """
     Plots the norm of the error of the tensor extracted using
     get_Tij_data_of_index.
@@ -151,6 +155,10 @@ def plot_norm_error_of_time(function_list,evolutions,filename_list,
     function_list is a list of functions for the analytic
     solution---one for each filename.
     """
+    norm_error_title = NORM_ERROR_TITLE
+    xlabel = XLABEL
+    norm_error_y_label = NORM_ERROR_Y_LABEL
+
     # First find the norm error as a function
     times_list = [None]*len(filename_list)
     errors_list = [None]*len(filename_list)
@@ -162,14 +170,21 @@ def plot_norm_error_of_time(function_list,evolutions,filename_list,
 
     # Change the font size
     mpl.rcParams.update({'font.size': FONTSIZE})
-    # Define plots
-    lines = [plt.plot(times_list[i],errors_list[i],linewidth=LINEWIDTH)\
-                 for i in range(len(times_list))]
+
+    # If an error list is included, rescale by the error
+    if h_list:
+        norm_error_title += '\nRescaled by Lattice Spacing'
+        norm_error_y_label = 'Rescaled '+norm_error_y_label
+        lines = [plt.loglog(times_list[i],(h_list[i]**(-rk_order))*errors_list[i],linewidth=LINEWIDTH) for i in range(len(times_list))]
+    else:
+        lines = [plt.loglog(times_list[i],errors_list[i],linewidth=LINEWIDTH)\
+                     for i in range(len(times_list))]
+
     plt.legend(filename_list)
     # Plot parameters
-    plt.title(NORM_ERROR_TITLE.format(order,tensor_name))
-    plt.xlabel(XLABEL)
-    plt.ylabel(NORM_ERROR_Y_LABEL.format(order,tensor_name))
+    plt.title(norm_error_title.format(order,tensor_name))
+    plt.xlabel(xlabel)
+    plt.ylabel(norm_error_y_label.format(order,tensor_name))
     # Show plot
     plt.show()
     return
@@ -182,7 +197,7 @@ def main(filename_list):
                                                    filename_list)
     analytic_func_list = [calculate_analytic_form(analytic_function,evolutions_list[i][0]) for i in range(len(filename_list))]
     plot_norm_error_of_time(analytic_func_list,evolutions_list,filename_list,
-                            TENSOR_NAME,ORDER)
+                            False,TENSOR_NAME,ORDER,RK_ORDER)
     return
 
 
