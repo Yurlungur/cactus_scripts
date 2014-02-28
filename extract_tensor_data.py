@@ -1,7 +1,7 @@
 """
 extract_tensor_data.py
 Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-Time-stamp: <2014-02-03 17:35:19 (jonah)>
+Time-stamp: <2014-02-16 22:28:13 (jonah)>
 
 This is a library extracts the data from the flattened array of a
 tensor that's used in Cactus ASCII gnuplot output.
@@ -125,15 +125,54 @@ def lose_ghost_points(snapshot):
     snapshot = filter(lambda row: bool(row), snapshot)
     return snapshot
 
+
 def extract_data(filename):
     """
     Extracts the data from a file and makes a list of snapshots as
     defined above in the approach.
     """
-    data_string = get_string(filename)
-    iterations = [lose_ghost_points(make_iteration_subarray(iteration)) \
-                      for iteration in get_iterations(data_string)]
-    return iterations
+    data = np.loadtxt(filename)
+    snapshots = {int(line[0]) : [] for line in data}
+    for row in data:
+        # Convenience variable definitions
+        time_step = int(row[0])
+        tl = int(row[1])
+        rl = int(row[2])
+        c = int(row[3])
+        ml = int(row[4])
+        ix = int(row[5])
+        iy = int(row[6])
+        iz = int(row[7])
+        t = row[8]
+        x = row[9]
+        y = row[10]
+        z = row[11]
+        Txx = row[12]
+        Txy = row[13]
+        Txz = row[14]
+        Tyy = row[15]
+        Tyz = row[16]
+        Tzz = row[17]
+        snapshot_row = [time_step,tl,
+                        np.array([rl,c,ml]),
+                        np.array([ix,iy,iz]),
+                        t, np.array([x,y,z]),
+                        np.array([Txx,Txy,Txz,Tyy,Tyz,Tzz])]
+        snapshots[row[0]].append(snapshot_row)
+    keys = snapshots.keys()
+    keys.sort()
+    snapshots_list = [snapshots[keys[i]] for i in range(len(keys))]
+    return snapshots_list
+
+# def extract_data(filename):
+#     """
+#     Extracts the data from a file and makes a list of snapshots as
+#     defined above in the approach.
+#     """
+#     data_string = get_string(filename)
+#     iterations = [lose_ghost_points(make_iteration_subarray(iteration)) \
+#                       for iteration in get_iterations(data_string)]
+#     return iterations
 
 def get_lattice_spacing(data):
     """

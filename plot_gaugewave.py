@@ -1,7 +1,7 @@
 """
 plot_gaugewave.py
 Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-Time-stamp: <2014-02-03 18:47:39 (jonah)>
+Time-stamp: <2014-02-28 12:08:41 (jonah)>
 
 This is a library containing a few simple tools for plotting a
 gaugewave. It contains constants like the amplitude.
@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 # Global Constants
 # ----------------------------------------------------------------------
 D = 1 # The period of the wave.
-A = 0.01 # The amplitude of the wave.
+A = 0.5 # The amplitude of the wave.
 COORD = 0 # The x coordinate
 E_INDEX=(0,0) # The xx component of the extrinsic curvature tensor
 RESOLUTION = 200 # Resolution for plot_kxx or plot_gxx
