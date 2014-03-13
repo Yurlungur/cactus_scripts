@@ -3,7 +3,7 @@
 """
 plot_gaugewave_3d_gxx.py
 Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-Time-stamp: <2014-02-28 11:58:35 (jonah)>
+Time-stamp: <2014-03-11 02:08:12 (jonah)>
 
 This program plots the xx component of the metric for a 3d gauge wave
 propogating along the vector <1,1,1>/sqrt(3) at time t of every input

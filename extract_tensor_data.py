@@ -1,7 +1,7 @@
 """
 extract_tensor_data.py
 Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-Time-stamp: <2014-02-16 22:28:13 (jonah)>
+Time-stamp: <2014-03-10 22:46:38 (jonah)>
 
 This is a library extracts the data from the flattened array of a
 tensor that's used in Cactus ASCII gnuplot output.
@@ -164,15 +164,15 @@ def extract_data(filename):
     snapshots_list = [snapshots[keys[i]] for i in range(len(keys))]
     return snapshots_list
 
-# def extract_data(filename):
-#     """
-#     Extracts the data from a file and makes a list of snapshots as
-#     defined above in the approach.
-#     """
-#     data_string = get_string(filename)
-#     iterations = [lose_ghost_points(make_iteration_subarray(iteration)) \
-#                       for iteration in get_iterations(data_string)]
-#     return iterations
+def extract_data_old(filename):
+    """
+    Extracts the data from a file and makes a list of snapshots as
+    defined above in the approach.
+    """
+    data_string = get_string(filename)
+    iterations = [lose_ghost_points(make_iteration_subarray(iteration)) \
+                      for iteration in get_iterations(data_string)]
+    return iterations
 
 def get_lattice_spacing(data):
     """

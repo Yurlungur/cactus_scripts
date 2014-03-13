@@ -1,7 +1,7 @@
 """
 plot_gaugewave.py
 Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-Time-stamp: <2014-02-28 12:08:41 (jonah)>
+Time-stamp: <2014-03-11 12:23:41 (jonah)>
 
 This is a library containing a few simple tools for plotting a
 gaugewave. It contains constants like the amplitude.
@@ -37,10 +37,6 @@ xlabel = "Position"
 SCALE_ERRORS = True
 ERR_LABEL_MODIFIER = r'$/h^4$'
 ACCEPTABLE_ERROR = 1E-14
-# Exponent to scale errors by
-EXPONENT = -4.0 if SCALE_ERRORS else 0.0
-# Exponent to scale errors by
-EXPONENT = -4.0 if SCALE_ERRORS else 0.0
 # Mark true for debugging statements
 DEBUGGING = False
 # ----------------------------------------------------------------------
@@ -140,7 +136,6 @@ def plot_Txx(positions_list,Txx_list,filename_list,time,ylabel,function):
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.title("Gaugewave {} after {} crossing times".format(ylabel,time))
-    plt.legend(filename_list)
     plt.legend(["theoretical value"] + filename_list)
     plt.show()
     return
@@ -176,6 +171,9 @@ def plot_errors(function,positions_list,Txx_list,
 
     h is the lattice spacing.
     """
+    # Exponent to scale errors by
+    exponent = -4.0 if divide_by_h_to_the_4 else 0.0
+
     # Center the kxx lists around their average
     if fix_offset:
         crude_average = lambda x: 0.5*(np.max(x) + np.min(x))
@@ -207,7 +205,7 @@ def plot_errors(function,positions_list,Txx_list,
             print "\t has lattice spacing {}".format(h_list[i])
 
     # Define errors to the fourth power
-    h4_errors = [(h_list[i]**(EXPONENT))*errors[i] \
+    h4_errors = [(h_list[i]**(exponent))*errors[i] \
                      for i in range(len(Txx_list))]
 
     # Change font size
@@ -216,7 +214,7 @@ def plot_errors(function,positions_list,Txx_list,
     lines = [plt.plot(positions_list[i],h4_errors[i],linewidth=my_linewidth)\
                  for i in range(len(positions_list))]
     # Plot parameters
-    plt.title("Guagewave {} after {} crossing times".format(err_label,time))
+    plt.title("Gaugewave {} after {} crossing times".format(err_label,time))
     plt.xlabel(xlabel)
     plt.ylabel(err_label)
     plt.legend(filename_list)
