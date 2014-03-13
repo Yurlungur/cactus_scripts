@@ -1,7 +1,7 @@
 """
 extract_tensor_data_multipatch.py
 Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-Time-stamp: <2014-03-12 10:25:27 (jonah)>
+Time-stamp: <2014-03-13 10:29:59 (jonah)>
 
 This little library extends extract_tensor_data.py to be multipatch aware.
 
@@ -13,7 +13,13 @@ It uses both the grid::coordinates files and the data files
 import numpy as np
 import extract_tensor_data as etd
 import extract_coordinates_data as ecd
+import simfactory_interface as interface
 # ----------------------------------------------------------------------
+
+# some simple wrappers
+extract_data = etd.extract_data
+make_coordinate_maps = ecd.make_coordinate_maps
+WARNING_MESSAGE = etd.WARNING_MESSAGE
 
 def sort_list_pair(list1,list2):
     """
@@ -62,10 +68,6 @@ def element_of_position_at_time(i,j,coord,time,data,maps):
     """
     return element_of_position_at_snapshot(i,j,coord,data[time],maps,time)
 
-# some simple wrappers
-extract_data = etd.extract_data
-make_coordinate_maps = ecd.make_coordinate_maps
-WARNING_MESSAGE = etd.WARNING_MESSAGE
 
 if __name__=="__main__":
     raise ImportWarning(WARNING_MESSAGE)

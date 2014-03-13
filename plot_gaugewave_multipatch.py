@@ -1,7 +1,7 @@
 """
 plot_gaugewave.py
 Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-Time-stamp: <2014-03-11 12:27:58 (jonah)>
+Time-stamp: <2014-03-13 11:11:22 (jonah)>
 
 This is a library containing a few simple tools for plotting a
 gaugewave. It contains constants like the amplitude.
@@ -50,7 +50,7 @@ RESTART_NUMBER = 0 # Restart number for the data directory
 RESOLUTION_PARAMETER_STRING = "Coordinates::ncells_x"
 DOMAIN_SIZE = 1
 # Mark true for debugging statements
-DEBUGGING = True
+DEBUGGING = False
 # Mark true if you want to examine error without phase or offset shift
 FIX_PHASE = False
 FIX_OFFSET = False
@@ -85,14 +85,14 @@ def generate_map_resolution_and_tensor_data(directory_name,
     if DEBUGGING:
         print "num cells = {}".format(number_of_cells)
         print "h = {}".format(resolution)
-    return tensor_data,coordinate_maps,resolution
+    return tensor_data,coordinate_maps,resolution,number_of_cells
 
 def get_Txx_data(time,directory_list,file_name=False):
     """
-    Takes a list of directories (strings) and generates three lists,
-    positions_list, Txx_list, and time_index_list. positions_list
-    contains positions data as described in
-    extract_tensor_data.py. Txx_list contains position data for the
+    Takes a list of directories (strings) and generates five lists,
+    positions_list, Txx_list, time_index_list, h_list, and
+    n_cells_list. positions_list contains positions data as described
+    in extract_tensor_data.py. Txx_list contains position data for the
     xx-component of the metric tensor.
 
     time_index_list defines the time iteration at which the data is
@@ -105,6 +105,8 @@ def get_Txx_data(time,directory_list,file_name=False):
     file_name gives the name of the file containing the tensor
     data. Defaults to the metric data projected along the x-axis.
 
+    n_cells_list provides the number of cells. in a parameter.
+
     This method is adapted for multipatch.
     """
     time = float('%.10f' % time)
@@ -112,8 +114,9 @@ def get_Txx_data(time,directory_list,file_name=False):
     Txx_list = []
     time_index_list = []
     h_list = []
+    num_cells_list = []
     for directory in directory_list:
-        tensor_data,coordinate_maps,h = generate_map_resolution_and_tensor_data(directory,
+        tensor_data,coordinate_maps,h,num_cells = generate_map_resolution_and_tensor_data(directory,
                                                                                 RESTART_NUMBER,
                                                                                 file_name)
         times = [float('%.10f' % snapshot[0][4]) for snapshot in tensor_data]
@@ -126,9 +129,10 @@ def get_Txx_data(time,directory_list,file_name=False):
         positions_list.append(position)
         Txx_list.append(Txx)
         h_list.append(h)
-    return positions_list,Txx_list,time_index_list,h_list
+        num_cells_list.append(num_cells)
+    return positions_list,Txx_list,time_index_list,h_list,num_cells_list
 
-def plot_Txx(function,positions_list,Txx_list,directory_list,ylabel,time):
+def plot_Txx(function,positions_list,Txx_list,num_cells_list,ylabel,time):
     """
     Plots the theoretical value for Txx at the time (not time index)
     and compares it to the same plots stored in positions_list and
@@ -137,11 +141,12 @@ def plot_Txx(function,positions_list,Txx_list,directory_list,ylabel,time):
     Function is the theoretical function for the xx-component of the
     tensor. Given for the domain at hand
     """
-    pg_original.plot_Txx(positions_list,Txx_list,directory_list,time,ylabel,function)
+    name_list = ["{} Cells".format(i) for i in num_cells_list]
+    pg_original.plot_Txx(positions_list,Txx_list,name_list,time,ylabel,function)
     return
 
 def plot_errors(function,positions_list,Txx_list,
-                h_list,directory_list,time,ylabel,err_label,
+                h_list,num_cells_list,time,ylabel,err_label,
                 fix_offset=False,fix_phase=False):
     """
     Plots the error for every datafile in the filename list. Rescales
@@ -154,8 +159,9 @@ def plot_errors(function,positions_list,Txx_list,
     comparing it to the analytic solution. In general, these features
     should be left off.
     """
+    name_list = ["{} Cells".format(i) for i in num_cells_list]
     pg_original.plot_errors(function,positions_list,
-                            Txx_list,h_list,directory_list,time,
+                            Txx_list,h_list,name_list,time,
                             ylabel,err_label,SCALE_ERRORS,
                             fix_offset,fix_phase)
     return
@@ -176,9 +182,9 @@ def generate_it_all(function,arguments,ylabel,file_name=False):
     err_label = "({} error)".format(ylabel) + ERR_LABEL_MODIFIER
     time = float(arguments[1])
     directory_list = arguments[2:]
-    positions_list,Txx_list,time_list,h_list = get_Txx_data(time,directory_list,file_name)
-    plot_Txx(function,positions_list,Txx_list,directory_list,ylabel,time)
-    plot_errors(function,positions_list,Txx_list,h_list,directory_list,
+    positions_list,Txx_list,time_list,h_list,num_cells_list = get_Txx_data(time,directory_list,file_name)
+    plot_Txx(function,positions_list,Txx_list,num_cells_list,ylabel,time)
+    plot_errors(function,positions_list,Txx_list,h_list,num_cells_list,
                 time,ylabel,err_label,False,False)
     return
 

@@ -1,7 +1,7 @@
 """
 plot_gaugewave.py
 Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-Time-stamp: <2014-03-11 12:23:41 (jonah)>
+Time-stamp: <2014-03-13 10:59:10 (jonah)>
 
 This is a library containing a few simple tools for plotting a
 gaugewave. It contains constants like the amplitude.
@@ -106,12 +106,12 @@ def get_difference(positions,Txxs):
                                       - Txxs[other_index][j])
     return pos,difference
 
-def plot_Txx(positions_list,Txx_list,filename_list,time,ylabel,function):
+def plot_Txx(positions_list,Txx_list,name_list,time,ylabel,function):
     """
     Plots the theoretical value for Txx, the xx-component of the
     tensor we're interested in at the time (not time index) and
     compares it to the same plots stored in positions_list and
-    Txx_list. Uses the filename_list for a legend.
+    Txx_list. Uses the name_list for a legend.
 
     ylabel is the label for the y-axis function is the theoretical
     function for the xx-component of the tensor.
@@ -136,7 +136,7 @@ def plot_Txx(positions_list,Txx_list,filename_list,time,ylabel,function):
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.title("Gaugewave {} after {} crossing times".format(ylabel,time))
-    plt.legend(["theoretical value"] + filename_list)
+    plt.legend(["theoretical value"] + name_list)
     plt.show()
     return
 
@@ -160,7 +160,7 @@ def find_Txx_phase_shift(function,position,Txx):
     return phi
 
 def plot_errors(function,positions_list,Txx_list,
-                h_list,filename_list,time,ylabel,err_label,
+                h_list,name_list,time,ylabel,err_label,
                 divide_by_h_to_the_4,
                 fix_offset,
                 fix_phase):
@@ -199,7 +199,7 @@ def plot_errors(function,positions_list,Txx_list,
                               phi_list[i])
             plt.plot(positions_list[i],Txx_list[i],x,y)
             plt.show()
-            print "{} has max error {}".format(filename_list[i],
+            print "{} has max error {}".format(name_list[i],
                                                 np.max(errors[i]))
             print "\t has {} grid points".format(len(errors[i]))
             print "\t has lattice spacing {}".format(h_list[i])
@@ -217,7 +217,7 @@ def plot_errors(function,positions_list,Txx_list,
     plt.title("Gaugewave {} after {} crossing times".format(err_label,time))
     plt.xlabel(xlabel)
     plt.ylabel(err_label)
-    plt.legend(filename_list)
+    plt.legend(name_list)
     plt.show()
     return
 
