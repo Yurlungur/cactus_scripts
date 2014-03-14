@@ -1,7 +1,7 @@
 """
 plot_gaugewave.py
 Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-Time-stamp: <2014-03-13 11:11:22 (jonah)>
+Time-stamp: <2014-03-13 14:49:03 (jonah)>
 
 This is a library containing a few simple tools for plotting a
 gaugewave. It contains constants like the amplitude.
@@ -14,7 +14,6 @@ formulation.
 
 # Imports
 # ----------------------------------------------------------------------
-
 # Import standard tools
 import numpy as np # For array support
 from scipy.optimize import curve_fit
@@ -44,7 +43,7 @@ YLABEL = r'$g_{xx}$'
 ERR_LABEL_MODIFIER = pg_original.ERR_LABEL_MODIFIER # /h^4
 ERR_LABEL = YLABEL + ERR_LABEL_MODIFIER
 ACCEPTABLE_ERROR = pg_original.ACCEPTABLE_ERROR
-EXPONENT = -4.0
+EXPONENT = pg_original.EXPONENT
 RESTART_NUMBER = 0 # Restart number for the data directory
 # For calculating the resolution
 RESOLUTION_PARAMETER_STRING = "Coordinates::ncells_x"

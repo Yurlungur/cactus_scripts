@@ -1,7 +1,7 @@
 """
 plot_gaugewave.py
 Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-Time-stamp: <2014-03-13 10:59:10 (jonah)>
+Time-stamp: <2014-03-13 15:10:32 (jonah)>
 
 This is a library containing a few simple tools for plotting a
 gaugewave. It contains constants like the amplitude.
@@ -35,8 +35,9 @@ fontsize = 20
 xlabel = "Position"
 # True if the errors are divided by h^4. False otherwise.
 SCALE_ERRORS = True
-ERR_LABEL_MODIFIER = r'$/h^4$'
 ACCEPTABLE_ERROR = 1E-14
+EXPONENT = -4
+ERR_LABEL_MODIFIER = r'$/h^4$'
 # Mark true for debugging statements
 DEBUGGING = False
 # ----------------------------------------------------------------------
@@ -172,7 +173,7 @@ def plot_errors(function,positions_list,Txx_list,
     h is the lattice spacing.
     """
     # Exponent to scale errors by
-    exponent = -4.0 if divide_by_h_to_the_4 else 0.0
+    exponent = EXPONENT if divide_by_h_to_the_4 else 0.0
 
     # Center the kxx lists around their average
     if fix_offset:

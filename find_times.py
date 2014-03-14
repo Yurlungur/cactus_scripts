@@ -3,7 +3,7 @@
 """
 find_times.py
 Author: Jonah Miller (jonah.maxwell.miller@gmail.com)
-Time-stamp: <2014-03-12 12:25:05 (jonah)>
+Time-stamp: <2014-03-13 15:37:56 (jonah)>
 
 This little script looks at the data files in a directory for a
 simulation and extracts at what coordinate times the simulation output
@@ -79,6 +79,30 @@ def get_time_data(directory_name):
     times = data[1]
     return times
 
+def get_time_dictionary(list_of_directories):
+    """
+    Takes a list of directories and maps each name to a time. 
+    """
+    times = {directory : get_time_data(directory)\
+                 for directory in list_of_directories}
+    return times
+
+def get_time_intersections(time_dictionary):
+    """
+    Takes a time dictionary and returns a list of the times that
+    intersect.
+    """
+    intersections = list(reduce(lambda x,y: set(x) & set(y),
+                                time_dictionary.values()))
+    intersections.sort()
+    return intersections
+
+def get_time_intersections_from_directories(list_of_directories):
+    """
+    Finds times all simulations in a list of directories share.
+    """
+    return get_time_intersections(get_time_dictionary(list_of_directories))
+
 def output_time_data(list_of_directories):
     """
     Given a list of directory names, finds the time data in each and
@@ -86,8 +110,7 @@ def output_time_data(list_of_directories):
     intersections.
     """
     print "Extracting time data..."
-    times = {directory : get_time_data(directory)\
-                 for directory in list_of_directories}
+    times = get_time_dictionary(list_of_directories)
     most_times = max([len(time) for time in times.values()])
     print most_times
     print "----------------------------------------------------------------"
@@ -98,8 +121,7 @@ def output_time_data(list_of_directories):
         print reduce(combine_names,[access_maybe(i,times[k]) for k in times.keys()])
     print "----------------------------------------------------------------"
     print "The times that intersect:"
-    intersections = list(reduce(lambda x,y: set(x) & set(y), times.values()))
-    intersections.sort()
+    intersections = get_time_intersections(times)
     for i in intersections:
         print "\t" + str(i)
     print "----------------------------------------------------------------"
